@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * Mesut Vatansever | mesut.vts@gmail.com
+ * Date: 15/06/16 15:00
+ */
+
+return [
+    'ldap' => [
+        'domain_controllers' => [''],
+        'base_dn' => 'DC=MesutDC,DC=com',
+        'admin_username' => 'CN=admin,CN=Users,DC=MesutDC,DC=com',
+        'admin_password' => '',
+        'port' => '389',
+        'use_tls' => true,
+    ]
+];
