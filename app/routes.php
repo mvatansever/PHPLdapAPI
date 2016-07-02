@@ -14,8 +14,6 @@ $app->group('/user', function() use($app){
     $app->get('/{user_id}', 'App\Controllers\UserController:getUser');
     $app->post('', 'App\Controllers\UserController:createUser');
     $app->put('/{user_id}', 'App\Controllers\UserController:updateUser');
-    $app->post('/{user_id}/disable', 'App\Controllers\UserController:disableUser');
-    $app->post('/{user_id}/activate', 'App\Controllers\UserController:activeUser');
 });
 
 

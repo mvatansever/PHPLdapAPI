@@ -156,28 +156,4 @@ class UserController extends Controller{
         return $resp;
 
     }
-
-    /**
-     * Disable/lock user
-     *
-     * @param ServerRequestInterface $req
-     * @param ResponseInterface $resp
-     * @param array $args
-     */
-    public function disableUser(ServerRequestInterface $req, ResponseInterface $resp, $args)
-    {
-        var_dump($args);
-    }
-
-    /**
-     * Enable/unlock user
-     *
-     * @param ServerRequestInterface $req
-     * @param ResponseInterface $resp
-     * @param array $args
-     */
-    public function activateUser(ServerRequestInterface $req, ResponseInterface $resp, $args)
-    {
-        var_dump($args);
-    }
 }
