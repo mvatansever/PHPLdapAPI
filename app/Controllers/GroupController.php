@@ -11,6 +11,7 @@ use Adldap\Models\Group;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use App\Repository\GroupRepository;
 
 class GroupController extends Controller{
 
@@ -37,7 +38,7 @@ class GroupController extends Controller{
 
     public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
-        var_dump($group_id);
+        
     }
 
     public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)

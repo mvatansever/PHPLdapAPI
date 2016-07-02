@@ -38,19 +38,17 @@ class UserController extends Controller{
     public function getAllUsers(ServerRequestInterface $req , ResponseInterface $resp){
 
         $returnUsers = [];
-        if($this->connect()){
 
-            $user_repo = new UserRepository($this->getProvider());
-            $returnUsers['results'] = $user_repo->getAllUsers();
+        $user_repo = new UserRepository($this->getProvider());
+        $returnUsers['results'] = $user_repo->getAllUsers();
 
-            if(empty($returnUsers)){
+        if(empty($returnUsers)){
 
-                $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(204);
-            }else{
+            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(204);
+        }else{
 
-                $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(200);
-                $resp->getBody()->write(json_encode($returnUsers));
-            }
+            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(200);
+            $resp->getBody()->write(json_encode($returnUsers));
         }
 
         return $resp;
@@ -72,20 +70,15 @@ class UserController extends Controller{
 
             throw new Exception('E-Mail adresi bilgisi girilmemis şarttır.');
         }
-        
-        if($this->connect()){
-            
-            $user_repo = new UserRepository($this->getProvider());
 
+        $user_repo = new UserRepository($this->getProvider());
 
-            if($user_repo->createUser($parameters)){
+        if ($user_repo->createUser($parameters)) {
+            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(201);
+            $resp->getBody()->write(json_encode($parameters));
+        }else{
 
-                $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(201);
-                $resp->getBody()->write(json_encode($parameters));
-            }else{
-
-                $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(501);
-            }
+            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(501);
         }
 
         return $resp;
@@ -101,21 +94,16 @@ class UserController extends Controller{
      */
     public function getUser(ServerRequestInterface $req, ResponseInterface $resp, $args)
     {
-
         $user_id = $args['user_id'];
-        if($this->connect()){
+        $user_repo = new UserRepository($this->getProvider());
+        $user = $user_repo->getUser($user_id);
 
-            $user_repo = new UserRepository($this->getProvider());
-            $user = $user_repo->getUser($user_id);
+        if (empty($user)) {
+            $resp = $resp->withStatus(204);
+        }else{
 
-            if(empty($user)){
-
-                $resp = $resp->withStatus(204);
-            }else{
-
-                $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
-                $resp->write(json_encode($user));
-            }
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
+            $resp->write(json_encode($user));
         }
 
         return $resp;
@@ -134,26 +122,22 @@ class UserController extends Controller{
         $user_id = $args['user_id'];
         $user_informations = (array) $req->getParsedBody();
 
-        if($this->connect()){
-            
-            $user_repo = new UserRepository($this->getProvider());
-            $update_user = $user_repo->updateUser($user_id, $user_informations);
+        $user_repo = new UserRepository($this->getProvider());
+        $update_user = $user_repo->updateUser($user_id, $user_informations);
 
-            if($update_user instanceof User){
+        if($update_user instanceof User){
 
-                $attributes = $update_user->getAttributes();
-                unset($attributes['objectclass']);
-                unset($attributes['objectcategory']);
+            $attributes = $update_user->getAttributes();
+            unset($attributes['objectclass']);
+            unset($attributes['objectcategory']);
 
-                $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
-                $resp->write(json_encode($attributes));
-            }else{
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
+            $resp->write(json_encode($attributes));
+        }else{
 
-                $resp->withStatus(409);
-            }
+            $resp->withStatus(409);
         }
 
         return $resp;
-
     }
 }
