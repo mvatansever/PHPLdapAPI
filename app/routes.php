@@ -26,11 +26,5 @@ $app->group('/group', function() use($app){
     $app->put('/{group_id}', 'App\Controllers\GroupController:updateGroup');
     $app->delete('/{group_id}', 'App\Controllers\GroupController:deleteGroup');
 
-
-    // Group Members
-    $app->post('/{group_id}/member', 'App\Controllers\GroupMembersController:addMemberToGroup');
-    $app->get('/{group_id}/member/{user_id}', 'App\Controllers\GroupMembersController:removeMemberFromGroup');
-
-
 });
 
