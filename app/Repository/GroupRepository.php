@@ -51,6 +51,13 @@ class GroupRepository extends Repository
         return $groupArray;
     }
 
+    /**
+     * Get all groups from passed base DN. If don't want to get members of group $members parameter set to false.
+     *
+     * @param string $own_base_dn
+     * @param bool $members
+     * @return array
+     */
     public function getAllGroups($own_base_dn, $members = true)
     {
         $groupArray = [];
@@ -80,6 +87,12 @@ class GroupRepository extends Repository
         return $groupArray;
     }
 
+    /**
+     * Get members of group passed to parameter.
+     *
+     * @param Group $group
+     * @return array
+     */
     public function getGroupMembers(Group $group)
     {
         $groupMembers = [];
