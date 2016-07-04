@@ -105,4 +105,34 @@ class GroupRepository extends Repository
         }
         return $groupMembers;
     }
+
+
+    /**
+     * Create a group on LDAP.
+     * 
+     * @param array $group_info
+     * @param string $base_dn
+     * @return bool
+     */
+    public function createGroup($group_info, $base_dn)
+    {
+        $base_dn = $base_dn . "," . $this->getBaseDN();
+        $base_dn = trim($base_dn,',');
+
+        $group = $this->getProvider()->make()->group();
+
+        $group->setName($group_info['name']);
+
+        if ($group_info['description']) {
+            $group->setDescription($group_info['description']);
+        }
+
+        $dnBuilder = $group->getDnBuilder();
+        $dnBuilder->addOu($group_info['name']);
+        $dnBuilder->setBase($base_dn);
+
+        $group->setDn($dnBuilder);
+
+        return $group->save();
+    }
 }

@@ -63,6 +63,19 @@ class GroupController extends Controller{
 
     public function createGroup(ServerRequestInterface $req, ResponseInterface $resp)
     {
-        var_dump("asda");
+        $params = (array)$req->getParsedBody();
+        $groupRepo = new GroupRepository($this->getProvider());
+
+        if($groupRepo->createGroup($params, "CN=Groups")){
+            $resp = $resp->withStatus(201);
+        }else{
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(500);
+            $resp = $resp->write(json_encode([
+                'error' => 1,
+                'message' => 'Group not created'
+            ]));
+        }
+
+        return $resp;
     }
 }
