@@ -22,24 +22,9 @@ class GroupController extends Controller{
 
     public function getAllGroups(ServerRequestInterface $req,  ResponseInterface $resp)
     {
-        if($this->connect()){
 
-            $result = $this->getProvider()->search()->groups()->get();
-
-            foreach ($result as $item) {
-
-                if($item instanceof Group){
-                    echo $item->getDn() . "<br>";
-                    var_dump($item->getMemberNames());
-                }
-            }
-        }
-    }
-
-    public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
-    {
         $groupRepo = new GroupRepository($this->getProvider());
-        $group = $groupRepo->getAGroup('Team1', 'CN=blabla');
+        $group = $groupRepo->getAllGroups('CN=blabla');
 
         if(empty($group)){
             $resp = $resp->withStatus(204);
@@ -47,6 +32,23 @@ class GroupController extends Controller{
             $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
             $resp->write(json_encode($group));
         }
+
+        return $resp;
+    }
+
+    public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
+    {
+        $groupRepo = new GroupRepository($this->getProvider());
+        $group = $groupRepo->getAGroup($group_id, 'CN=blabla');
+
+        if(empty($group)){
+            $resp = $resp->withStatus(204);
+        }else{
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
+            $resp->write(json_encode($group));
+        }
+
+        return $resp;
     }
 
     public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)

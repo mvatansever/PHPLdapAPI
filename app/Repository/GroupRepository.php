@@ -43,13 +43,7 @@ class GroupRepository extends Repository
                 if ($members)
                 {
                     $count = count($groupArray);
-                    foreach ($group->getMembers() as $member)
-                    {
-                        if ($member instanceof AbstractModel)
-                        {
-                            $groupArray[$count][] = $member->getDn();
-                        }
-                    }
+                    $groupArray[$count]['members'] = $this->getGroupMembers($group);
                 }
             }
         }
@@ -57,5 +51,45 @@ class GroupRepository extends Repository
         return $groupArray;
     }
 
+    public function getAllGroups($own_base_dn, $members = true)
+    {
+        $groupArray = [];
+        $base_dn = $own_base_dn . "," . $this->getBaseDN();
+        $base_dn = trim($base_dn,',');
 
+        $qb = $this->getProvider()->search()->groups();
+        $qb->setDn($base_dn);
+        $groupsResult = $qb->get();
+
+        foreach ($groupsResult->all() as $group) {
+
+            if ($group instanceof Group)
+            {
+                $groupArray[] = [
+                    'name' => $group->getName()
+                ];
+
+                if ($members)
+                {
+                    $count = count($groupArray);
+                    $groupArray[$count]['members'] = $this->getGroupMembers($group);
+                }
+            }
+        }
+
+        return $groupArray;
+    }
+
+    public function getGroupMembers(Group $group)
+    {
+        $groupMembers = [];
+        foreach ($group->getMembers() as $member)
+        {
+            if ($member instanceof AbstractModel)
+            {
+                $groupMembers[] = $member->getDn();
+            }
+        }
+        return $groupMembers;
+    }
 }
