@@ -6,7 +6,7 @@ This project based on Slim Framework 3 and use Adldap2 package for LDAP jobs. I 
 For this reason I want to share this project and a small support to Open Source world. 
 
 
-#How Install It?
+#How to Install It?
 Clone this repository to your local:
 **git clone https://github.com/mesutv/PHPLdapAPI.git**
 
