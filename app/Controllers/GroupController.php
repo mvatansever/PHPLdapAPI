@@ -53,7 +53,20 @@ class GroupController extends Controller{
 
     public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
-        var_dump($group_id);
+        $params = (array)$req->getParsedBody();
+        $groupRepo = new GroupRepository($this->getProvider());
+
+        if($groupRepo->updateGroup($params, $group_id, "CN=Groups")){
+            $resp = $resp->withStatus(200);
+        }else{
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(400);
+            $resp = $resp->write(json_encode([
+                'error' => 1,
+                'message' => 'Group not created. Please glance at your server manually for the catch real error.'
+            ]));
+        }
+
+        return $resp;
     }
 
     public function deleteGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)

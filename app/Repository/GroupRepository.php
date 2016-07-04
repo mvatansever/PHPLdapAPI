@@ -109,7 +109,7 @@ class GroupRepository extends Repository
 
     /**
      * Create a group on LDAP.
-     * 
+     *
      * @param array $group_info
      * @param string $base_dn
      * @return bool
@@ -134,5 +134,37 @@ class GroupRepository extends Repository
         $group->setDn($dnBuilder);
 
         return $group->save();
+    }
+
+    /**
+     * Update a group on LDAP.
+     *
+     * @param array $group_info
+     * @param string $group_ou
+     * @param string $base_cn
+     * @return bool
+     */
+    public function updateGroup($group_info, $group_ou, $base_cn)
+    {
+
+        $base_dn = $base_cn . "," . $this->getBaseDN();
+        $group_base_dn = "OU=" . $group_ou . "," . $base_dn;
+
+        $group = $this->getProvider()->search()->groups()->findByDn($group_base_dn);
+
+        if ($group instanceof Group) {
+
+            if($group_info['name']){
+                $group->setName($group_info['name']);
+            }
+
+            if($group_info['description']){
+                $group->setDescription($group_info['description']);
+            }
+
+            return $group->save();
+        }
+
+        return false;
     }
 }
