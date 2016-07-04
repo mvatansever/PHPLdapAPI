@@ -38,7 +38,15 @@ class GroupController extends Controller{
 
     public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
-        
+        $groupRepo = new GroupRepository($this->getProvider());
+        $group = $groupRepo->getAGroup('Team1', 'CN=blabla');
+
+        if(empty($group)){
+            $resp = $resp->withStatus(204);
+        }else{
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
+            $resp->write(json_encode($group));
+        }
     }
 
     public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
