@@ -167,4 +167,27 @@ class GroupRepository extends Repository
 
         return false;
     }
+
+    /**
+     * Delete a group on LDAP.
+     *
+     * @param string $group_ou
+     * @param string $base_cn
+     * @return bool
+     * @throws \Adldap\Exceptions\AdldapException
+     * @throws \Adldap\Exceptions\ModelNotFoundException
+     */
+    public function deleteGroup($group_ou, $base_cn)
+    {
+        $base_dn = $base_cn . "," . $this->getBaseDN();
+        $group_base_dn = "OU=" . $group_ou . "," . $base_dn;
+
+        $group = $this->getProvider()->search()->groups()->findByDn($group_base_dn);
+
+        if($group instanceof Group){
+            return $group->delete();
+        }
+
+        return false;
+    }
 }

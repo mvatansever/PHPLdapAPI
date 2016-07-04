@@ -7,6 +7,8 @@
 
 namespace App\Controllers;
 
+use Adldap\Exceptions\AdldapException;
+use Adldap\Exceptions\ModelNotFoundException;
 use Adldap\Models\Group;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -71,7 +73,31 @@ class GroupController extends Controller{
 
     public function deleteGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
-        var_dump($group_id);
+        $groupRepo = new GroupRepository($this->getProvider());
+
+        try {
+
+            if ($groupRepo->deleteGroup($group_id, "CN=Groups")) {
+                $resp = $resp->withStatus(200);
+            }else {
+                $resp = $resp->withStatus(500);
+            }
+
+        }catch (ModelNotFoundException $modelEx){
+
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(410);
+
+        }catch (AdldapException $adEx){
+
+            $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(404);
+            $resp = $resp->write(json_encode([
+                'error' => 1,
+                'message' => $adEx->getMessage()
+            ]));
+
+        }
+
+        return $resp;
     }
 
     public function createGroup(ServerRequestInterface $req, ResponseInterface $resp)
