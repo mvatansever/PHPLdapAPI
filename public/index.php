@@ -10,7 +10,6 @@ error_reporting(E_WARNING);
 require_once "../vendor/autoload.php";
 
 $auth = require_once "../config/auth.php";
-$basic_auth = new \App\Middleware\BasicAuth($auth['basic_auths']);
 
 $app = new \Slim\App([
     'settings' => require_once "../config/settings.php",
@@ -20,8 +19,11 @@ $app = new \Slim\App([
 // Helpers
 require_once "../app/Helper/repository.php";
 
-// Basic Authentication for all routes
-$app->add($basic_auth);
+if ($app->getContainer()->get('settings')['basic_auth']) {
+    // Basic Authentication for all routes
+    $basic_auth = new \App\Middleware\BasicAuth($auth['basic_auths']);
+    $app->add($basic_auth);
+}
 
 require_once "../app/routes.php";
 

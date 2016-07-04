@@ -6,5 +6,5 @@
  */
 
 return [
-    
+    'basic_auth' => true
 ];
