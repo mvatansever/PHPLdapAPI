@@ -8,14 +8,17 @@
 namespace App\Repository;
 
 use Adldap\Connections\Provider;
+use Adldap\Objects\DistinguishedName;
 
 class Repository{
 
     protected $provider;
+    protected $baseDN;
 
-    public function __construct(Provider $provider)
+    public function __construct(Provider $provider, $baseCN)
     {
         $this->provider = $provider;
+        $this->baseDN = $this->makeDN($this->getBaseDN(), $baseCN);
     }
 
     /**
@@ -37,5 +40,21 @@ class Repository{
     public function getBaseDN()
     {
         return $this->getProvider()->getConfiguration()->getBaseDn();
+    }
+
+    /**
+     * Make DN with given name and baseDN.
+     *
+     * @param $baseDN
+     * @param $name
+     * @return string
+     */
+    public function makeDN($baseDN, $name)
+    {
+        $dnBuilder = new DistinguishedName();
+        $dnBuilder->addCn($name);
+        $dnBuilder->setBase($baseDN);
+
+        return $dnBuilder->get();
     }
 }
