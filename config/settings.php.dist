@@ -6,5 +6,6 @@
  */
 
 return [
-    'basic_auth' => true
+    'basic_auth' => true,
+    'users_cn' => 'Users'
 ];
