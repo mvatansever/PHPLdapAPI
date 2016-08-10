@@ -14,16 +14,13 @@ class UserRepository extends Repository{
     /**
      * Return all users from LDAP DN
      *
-     * @param string $base_cn
      * @return array
      */
-    public function getAllUsers($base_cn = "CN=Users")
+    public function getAllUsers()
     {
         $returnArray = [];
 
-        $base_dn = $base_cn . "," . $this->getBaseDN();
-        $this->getProvider()->getConfiguration()->setBaseDn($base_dn);
-
+        $this->getProvider()->getConfiguration()->setBaseDn($this->baseDN);
         $users = $this->getProvider()->search()->users()->get();
 
         foreach ($users as $user) {
@@ -53,45 +50,46 @@ class UserRepository extends Repository{
     /**
      * Get user from LDAP
      *
-     * @param string $user_cn
-     * @param string $own_base_cn
+     * @param string $accountName
      * @return array
+     * @throws \Exception
      */
-    public function getUser($user_cn, $own_base_cn = "CN=Users")
+    public function getUser($accountName)
     {
+        $qb = $this->getProvider()->search()->newQuery($this->baseDN);
 
-        $userArray = [];
-        $base_dn = $own_base_cn . "," . $this->getBaseDN();
-        $qb = $this->getProvider()->search()->newQuery($base_dn);
+        $user = $qb->whereEquals(
+            $this->getProvider()->getSchema()->accountName(),
+            $accountName
+        )->get();
 
-        $users = $qb->whereEquals('cn', $user_cn)->get();
-
-        foreach ($users as $item) {
-
-            if($item instanceof User){
-
-                /**
-                 * PHP array keys are case-sensitive
-                 * And don't want to use name with changed name
-                 * For this reason used strtolower function
-                 */
-                $userArray = [
-                    'name' => $item->getName(),
-                    'surname' => $item->getAttribute('sn',0),
-                    'displayName' => $item->getDisplayName(),
-                    'mail' => $item->getEmail(),
-                    'jobTitle' => $item->getTitle(),
-                    'department' => $item->getDepartment(),
-                    'company' => $item->getCompany(),
-                    'office' => $item->getPhysicalDeliveryOfficeName(),
-                    'manager' => $item->getAttribute('manager'),
-                    'directReports' => $item->getAttribute(strtolower('directReports')),
-                    'mobile' => $item->getAttribute('mobile',0),
-                    'phone' => $item->getTelephoneNumber(),
-                    'isLocked' => $item->getLockoutTime() == "" ? false : true,
-                ];
-            }
+        if($user->count() < 1){
+            throw new \Exception("Not found user at LDAP");
         }
+
+        // Get first record
+        $user = $user[0];
+
+        /**
+         * PHP array keys are case-sensitive
+         * And don't want to use name with changed name
+         * For this reason used strtolower function
+         */
+        $userArray = [
+            'name' => $user->getName(),
+            'surname' => $user->getAttribute('sn',0),
+            'displayName' => $user->getDisplayName(),
+            'mail' => $user->getEmail(),
+            'jobTitle' => $user->getTitle(),
+            'department' => $user->getDepartment(),
+            'company' => $user->getCompany(),
+            'office' => $user->getPhysicalDeliveryOfficeName(),
+            'manager' => $user->getAttribute('manager'),
+            'directReports' => $user->getAttribute(strtolower('directReports')),
+            'mobile' => $user->getAttribute('mobile',0),
+            'phone' => $user->getTelephoneNumber(),
+            'isLocked' => $user->getLockoutTime() == "" ? false : true,
+        ];
 
         return $userArray;
     }
@@ -100,80 +98,59 @@ class UserRepository extends Repository{
      * Create a user on LDAP
      *
      * @param array $user_informations
-     * @param string $own_base_cn
      * @return bool
      */
-    public function createUser($user_informations = [], $own_base_cn = "CN=Users")
+    public function storeUser($user_informations = [])
     {
-
-        $base_dn = $own_base_cn . "," . $this->getBaseDN();
-
         $user = $this->getProvider()->make()->user();
 
-        // Validation BEGIN
-        if($user_informations['name'] != ""){
-            $user->setCommonName($user_informations['name']);
-        }
+        // Set name of User
+        $user = $this->setNameOfUser($user, $user_informations['name']);
 
-        if($user_informations['displayName'] != ""){
+        // Validation BEGIN
+        if($user_informations['displayName'] != "")
+        {
             $user->setDisplayName($user_informations['displayName']);
         }
 
-        if($user_informations['surname'] != ""){
+        if($user_informations['surname'] != "")
+        {
             $user->setAttribute('sn', $user_informations['surname']);
         }
 
-        if($user_informations['jobTitle'] != ""){
+        if($user_informations['jobTitle'] != "")
+        {
             $user->setTitle($user_informations['jobTitle']);
         }
 
-        if($user_informations['mail'] != ""){
+        if($user_informations['mail'] != "")
+        {
             $user->setEmail($user_informations['mail']);
         }
 
-        if($user_informations['name'] != ""){
-            $user->setName($user_informations['name']);
-        }
-
-        if($user_informations['department'] != ""){
-            $user->setDepartment($user_informations['department']);
-        }
-
-        if($user_informations['company'] != ""){
-            $user->setCompany($user_informations['company']);
-        }
-
-        if($user_informations['office'] != ""){
+        if($user_informations['office'] != "")
+        {
             $user->setPhysicalDeliveryOfficeName($user_informations['office']);
         }
 
-        if($user_informations['manager'] != ""){
-
-            $qb = $this->getProvider()->search()->users();
-            $qb->whereEquals('cn', $user_informations['manager']);
-
-            $manager = $qb->setDn($base_dn)->get()[0];
-
-            if($manager instanceof User){
-                $user->setManager($manager->getDn());
-            }
+        if($user_informations['manager'] != "")
+        {
+            $user = $this->setManager($user, $user_informations['manager']);
         }
 
-        if($user_informations['phone'] != ""){
+        if($user_informations['phone'] != "")
+        {
             $user->setAttribute('telephoneNumber', $user_informations['phone']);
         }
 
-        if($user_informations['mobile'] != ""){
+        if($user_informations['mobile'] != "")
+        {
             $user->setAttribute('mobile', $user_informations['mobile']);
         }
         // Validation END
 
-
-        $dnBuilder = $user->getDnBuilder();
-        $dnBuilder->addCn($user->getCommonName());
-        $dnBuilder->setBase($base_dn);
-
-        $user->setDn($dnBuilder);
+        $userBaseDN = $this->makeDN($this->baseDN, $user_informations['name']);
+        $user->setDn($userBaseDN);
 
         return $user->save();
     }
@@ -181,19 +158,17 @@ class UserRepository extends Repository{
     /**
      * Update user on LDAP
      *
-     * @param $user_id
-     * @param array $user_informations
-     * @param string $base_cn
+     * @param $accountName        string
+     * @param $user_informations  array
      * @return bool | User
      */
-    public function updateUser($user_id, $user_informations = [], $base_cn = "CN=Users")
+    public function updateUser($accountName, $user_informations = [])
     {
-        $base_dn = $base_cn . "," . $this->getBaseDN();
-        $user_base_dn = "CN=" . $user_id . "," . $base_dn;
+        $user = $this->getProvider()->search()->users()->findBy(
+            $this->getProvider()->getSchema()->accountName(),
+            $accountName
+        );
 
-        $user = $this->getProvider()->search()->users()->findByDn($user_base_dn);
-
-        // To make IDE-friendly
         if($user instanceof User){
 
             /**
@@ -249,36 +224,53 @@ class UserRepository extends Repository{
 
             // Managers will search in LDAP which found managers to be merge with exists managers and will added to "manager" attribute
             // For this reason the attribute has got specifically processes
-            if( isset($user_informations['manager']) ){
-
-                $qb = $this->getProvider()->search()->users();
-
-                $qb->whereEquals('cn',$user_informations['manager']);
-
-                $manager = $qb->setDn($base_dn)->get()[0];
-
-                if($manager instanceof User){
-
-                    if(
-                        $resultManager = existValueError($user, $manager->getDn(), $user->getSchema()->manager(), true)
-                    ){
-                        $user->setManager($manager->getDn());
-                    }
-                }
-
+            if( isset($user_informations['manager']) )
+            {
+                $user = $this->setManager($user, $user_informations['manager']);
             }
 
-            if($user->save()){
-
-                return $user;
-            }else{
-
-                return false;
-            }
-
+            return $user->save();
         }
 
         return false;
 
+    }
+
+    /**
+     * Set user's special name attributes.
+     * CN, Name and sAMAccountName attributes setting here.
+     *
+     * @param User $user
+     * @param $name
+     * @return User
+     */
+    private function setNameOfUser(User $user, $name){
+
+        $user->setAccountName($name);
+        $user->setCommonName($name);
+        $user->setName($name);
+
+        return $user;
+    }
+
+    /**
+     * Set user's manager
+     *
+     * @param User $user
+     * @param $managerName
+     * @return User
+     */
+    private function setManager(User $user, $managerName)
+    {
+        $qb = $this->getProvider()->search()->users();
+        $qb->whereEquals($this->getProvider()->getSchema()->accountName(), $managerName);
+
+        $manager = $qb->setDn($this->baseDN)->get()[0];
+
+        if($manager instanceof User){
+            $user->setManager($manager->getDn());
+        }
+
+        return $user;
     }
 }
