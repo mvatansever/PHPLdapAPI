@@ -90,20 +90,4 @@ class Controller{
     {
         return $this->provider;
     }
-
-    /**
-     * @return string | null
-     */
-    public function getOwnBaseDn()
-    {
-        return $this->own_base_dn;
-    }
-
-    /**
-     * @param string $own_base_dn
-     */
-    public function setOwnBaseDn($own_base_dn)
-    {
-        $this->own_base_dn = $own_base_dn;
-    }
 }

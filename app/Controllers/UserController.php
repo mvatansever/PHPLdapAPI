@@ -16,6 +16,7 @@ use Exception;
 
 class UserController extends Controller{
 
+    protected $userCN;
     /**
      * UserController constructor.
      *
@@ -24,10 +25,9 @@ class UserController extends Controller{
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
-
-        $this->setOwnBaseDn("CN=Users");
+        $this->userCN = $this->container->get('settings')['users_cn'];
     }
-
+    
     /**
      * Get all users from LDAP
      *
@@ -39,7 +39,7 @@ class UserController extends Controller{
 
         $returnUsers = [];
 
-        $user_repo = new UserRepository($this->getProvider());
+        $user_repo = new UserRepository($this->getProvider(), $this->userCN);
         $returnUsers['results'] = $user_repo->getAllUsers();
 
         if(empty($returnUsers)){
@@ -66,14 +66,19 @@ class UserController extends Controller{
     public function createUser(ServerRequestInterface $req, ResponseInterface $resp)
     {
         $parameters = (array)$req->getParsedBody();
-        if(empty($parameters['mail'])){
-
-            throw new Exception('E-Mail adresi bilgisi girilmemis şarttır.');
+        if(empty($parameters['name']))
+        {
+            throw new Exception('Name attributes must be set.');
         }
 
-        $user_repo = new UserRepository($this->getProvider());
+        if(empty($parameters['password']))
+        {
+            throw new Exception('Password must be set.');
+        }
 
-        if ($user_repo->createUser($parameters)) {
+        $user_repo = new UserRepository($this->getProvider(), $this->userCN);
+
+        if ($user_repo->storeUser($parameters)) {
             $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(201);
             $resp->getBody()->write(json_encode($parameters));
         }else{
@@ -95,7 +100,7 @@ class UserController extends Controller{
     public function getUser(ServerRequestInterface $req, ResponseInterface $resp, $args)
     {
         $user_id = $args['user_id'];
-        $user_repo = new UserRepository($this->getProvider());
+        $user_repo = new UserRepository($this->getProvider(), $this->userCN);
         $user = $user_repo->getUser($user_id);
 
         if (empty($user)) {
@@ -122,7 +127,7 @@ class UserController extends Controller{
         $user_id = $args['user_id'];
         $user_informations = (array) $req->getParsedBody();
 
-        $user_repo = new UserRepository($this->getProvider());
+        $user_repo = new UserRepository($this->getProvider(), $this->userCN);
         $update_user = $user_repo->updateUser($user_id, $user_informations);
 
         if($update_user instanceof User){

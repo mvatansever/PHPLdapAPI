@@ -9,7 +9,6 @@ namespace App\Controllers;
 
 use Adldap\Exceptions\AdldapException;
 use Adldap\Exceptions\ModelNotFoundException;
-use Adldap\Models\Group;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -17,16 +16,19 @@ use App\Repository\GroupRepository;
 
 class GroupController extends Controller{
 
+    protected $groupCN;
+
     public function __construct(ContainerInterface $containerInterface)
     {
         parent::__construct($containerInterface);
+        $this->groupCN = $this->container->get('settings')['users_cn'];
     }
 
     public function getAllGroups(ServerRequestInterface $req,  ResponseInterface $resp)
     {
-
-        $groupRepo = new GroupRepository($this->getProvider());
-        $group = $groupRepo->getAllGroups('CN=blabla');
+        $params = (array)$req->getParsedBody();
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
+        $group = $groupRepo->getAllGroups($params['getMember'] ? true : false); // Ouu very sexy code :))
 
         if(empty($group)){
             $resp = $resp->withStatus(204);
@@ -38,10 +40,10 @@ class GroupController extends Controller{
         return $resp;
     }
 
-    public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
+    public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $accountName)
     {
-        $groupRepo = new GroupRepository($this->getProvider());
-        $group = $groupRepo->getAGroup($group_id, 'CN=blabla');
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
+        $group = $groupRepo->getAGroup($accountName);
 
         if(empty($group)){
             $resp = $resp->withStatus(204);
@@ -53,12 +55,12 @@ class GroupController extends Controller{
         return $resp;
     }
 
-    public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
+    public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $groupName)
     {
         $params = (array)$req->getParsedBody();
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
 
-        if($groupRepo->updateGroup($params, $group_id, "CN=Groups")){
+        if($groupRepo->updateGroup($params, $groupName)){
             $resp = $resp->withStatus(200);
         }else{
             $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(400);
@@ -71,13 +73,13 @@ class GroupController extends Controller{
         return $resp;
     }
 
-    public function deleteGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
+    public function deleteGroup(ServerRequestInterface $req, ResponseInterface $resp, $accountName)
     {
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
 
         try {
 
-            if ($groupRepo->deleteGroup($group_id, "CN=Groups")) {
+            if ($groupRepo->deleteGroup($accountName)) {
                 $resp = $resp->withStatus(200);
             }else {
                 $resp = $resp->withStatus(500);
@@ -103,9 +105,13 @@ class GroupController extends Controller{
     public function createGroup(ServerRequestInterface $req, ResponseInterface $resp)
     {
         $params = (array)$req->getParsedBody();
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
 
-        if($groupRepo->createGroup($params, "CN=Groups")){
+        if(empty($params['name'])){
+            throw new \Exception("Name attribute must be set!");
+        }
+
+        if($groupRepo->storeGroup($params)){
             $resp = $resp->withStatus(201);
         }else{
             $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(500);
