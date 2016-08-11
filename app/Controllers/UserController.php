@@ -68,9 +68,14 @@ class UserController extends Controller{
     public function createUser(ServerRequestInterface $req, ResponseInterface $resp)
     {
         $parameters = (array)$req->getParsedBody();
-        if(empty($parameters['mail']))
+        if(empty($parameters['name']))
         {
-            throw new Exception('E-Mail adresi bilgisi girilmesi şarttır.');
+            throw new Exception('Name attributes must be set.');
+        }
+
+        if(empty($parameters['password']))
+        {
+            throw new Exception('Password must be set.');
         }
 
         $user_repo = new UserRepository($this->getProvider(), $this->userCN);
