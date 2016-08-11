@@ -9,7 +9,6 @@ namespace App\Controllers;
 
 use Adldap\Exceptions\AdldapException;
 use Adldap\Exceptions\ModelNotFoundException;
-use Adldap\Models\Group;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -17,15 +16,18 @@ use App\Repository\GroupRepository;
 
 class GroupController extends Controller{
 
+    protected $groupCN;
+
     public function __construct(ContainerInterface $containerInterface)
     {
         parent::__construct($containerInterface);
+        $this->groupCN = $this->container->get('settings')['users_cn'];
     }
 
     public function getAllGroups(ServerRequestInterface $req,  ResponseInterface $resp)
     {
 
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
         $group = $groupRepo->getAllGroups('CN=blabla');
 
         if(empty($group)){
@@ -40,7 +42,7 @@ class GroupController extends Controller{
 
     public function getGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
         $group = $groupRepo->getAGroup($group_id, 'CN=blabla');
 
         if(empty($group)){
@@ -56,7 +58,7 @@ class GroupController extends Controller{
     public function updateGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
         $params = (array)$req->getParsedBody();
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
 
         if($groupRepo->updateGroup($params, $group_id, "CN=Groups")){
             $resp = $resp->withStatus(200);
@@ -73,7 +75,7 @@ class GroupController extends Controller{
 
     public function deleteGroup(ServerRequestInterface $req, ResponseInterface $resp, $group_id)
     {
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
 
         try {
 
@@ -104,7 +106,7 @@ class GroupController extends Controller{
     public function createGroup(ServerRequestInterface $req, ResponseInterface $resp)
     {
         $params = (array)$req->getParsedBody();
-        $groupRepo = new GroupRepository($this->getProvider());
+        $groupRepo = new GroupRepository($this->getProvider(), $this->groupCN);
 
         if($groupRepo->createGroup($params, "CN=Groups")){
             $resp = $resp->withStatus(201);
