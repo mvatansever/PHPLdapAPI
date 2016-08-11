@@ -25,8 +25,6 @@ class UserController extends Controller{
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
-
-        $this->setOwnBaseDn("CN=Users");
         $this->userCN = $this->container->get('settings')['users_cn'];
     }
     
