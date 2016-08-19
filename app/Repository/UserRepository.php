@@ -108,42 +108,42 @@ class UserRepository extends Repository{
         $user = $this->setNameOfUser($user, $user_informations['name']);
 
         // Validation BEGIN
-        if($user_informations['displayName'] != "")
+        if(isset($user_informations['displayName']))
         {
             $user->setDisplayName($user_informations['displayName']);
         }
 
-        if($user_informations['surname'] != "")
+        if(isset($user_informations['surname']))
         {
             $user->setAttribute('sn', $user_informations['surname']);
         }
 
-        if($user_informations['jobTitle'] != "")
+        if(isset($user_informations['jobTitle']))
         {
             $user->setTitle($user_informations['jobTitle']);
         }
 
-        if($user_informations['mail'] != "")
+        if(isset($user_informations['mail']))
         {
             $user->setEmail($user_informations['mail']);
         }
 
-        if($user_informations['office'] != "")
+        if(isset($user_informations['office']))
         {
             $user->setPhysicalDeliveryOfficeName($user_informations['office']);
         }
 
-        if($user_informations['manager'] != "")
+        if(isset($user_informations['manager']))
         {
             $user = $this->setManager($user, $user_informations['manager']);
         }
 
-        if($user_informations['phone'] != "")
+        if(isset($user_informations['phone']))
         {
             $user->setAttribute('telephoneNumber', $user_informations['phone']);
         }
 
-        if($user_informations['mobile'] != "")
+        if(isset($user_informations['mobile']))
         {
             $user->setAttribute('mobile', $user_informations['mobile']);
         }
@@ -177,56 +177,36 @@ class UserRepository extends Repository{
         );
 
         if($user instanceof User){
-
-            /**
-             * My base values are here: http://www.kouti.com/tables/userattributes.htm
-             */
-            if(
-                $displayName = existValueError($user, $user_informations['displayName'], $user->getSchema()->displayName())
-            ){
-                $user->setDisplayName($displayName);
+            if(isset($user_informations['displayName'])){
+                $user->setDisplayName($user_informations['displayName']);
             }
 
-            if(
-                $jobTitle = existValueError($user, $user_informations['jobTitle'], $user->getSchema()->title())
-            ){
-                $user->setTitle($jobTitle);
+            if(isset($user_informations['jobTitle'])){
+                $user->setTitle($user_informations['jobTitle']);
             }
 
-            if(
-                $mail = existValueError($user, $user_informations['mail'], $user->getSchema()->email())
-            ){
-                $user->setEmail($mail);
+            if(isset($user_informations['mail'])){
+                $user->setEmail($user_informations['mail']);
             }
 
-            if(
-                $department = existValueError($user, $user_informations['department'], $user->getSchema()->department())
-            ){
-                $user->setDepartment($department);
+            if(isset($user_informations['department'])){
+                $user->setDepartment($user_informations['department']);
             }
 
-            if(
-                $company = existValueError($user, $user_informations['company'], $user->getSchema()->company())
-            ){
-                $user->setCompany($company);
+            if(isset($user_informations['company'])){
+                $user->setCompany($user_informations['company']);
             }
 
-            if(
-                $office = existValueError($user, $user_informations['office'], $user->getSchema()->physicalDeliveryOfficeName())
-            ){
-                $user->setPhysicalDeliveryOfficeName($office);
+            if(isset($user_informations['office'])){
+                $user->setPhysicalDeliveryOfficeName($user_informations['office']);
             }
 
-            if(
-                $phone = existValueError($user, $user_informations['phone'], $user->getSchema()->telephone())
-            ){
-                $user->setTelephoneNumber($phone);
+            if(isset($user_informations['phone'])){
+                $user->setTelephoneNumber($user_informations['phone']);
             }
 
-            if(
-                $mobile = existValueError($user, $user_informations['mobile'], 'mobile')
-            ){
-                $user->setAttribute('mobile', $mobile);
+            if(isset($user_informations['mobile'])){
+                $user->setAttribute('mobile', $user_informations['mobile']);
             }
 
             // Managers will search in LDAP which found managers to be merge with exists managers and will added to "manager" attribute
