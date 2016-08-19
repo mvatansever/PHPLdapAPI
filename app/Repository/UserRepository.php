@@ -98,7 +98,7 @@ class UserRepository extends Repository{
      * Create a user on LDAP
      *
      * @param array $user_informations
-     * @return User
+     * @return bool
      */
     public function storeUser($user_informations = [])
     {
@@ -154,12 +154,12 @@ class UserRepository extends Repository{
         $user->setDn($userBaseDN);
 
         // Save user to LDAP
-        $user->save();
-        
-        // Set password after user is saved
-        $user = $this->setPassword($user, $user_informations['password']);
+        if( $user->save() ) {
+            // Set password after user is saved
+            return $this->setPassword($user, $user_informations['password']);
+        }
 
-        return $user;
+        return false;
     }
 
     /**
@@ -167,7 +167,7 @@ class UserRepository extends Repository{
      *
      * @param $accountName        string
      * @param $user_informations  array
-     * @return bool | User
+     * @return bool
      */
     public function updateUser($accountName, $user_informations = [])
     {
@@ -286,14 +286,13 @@ class UserRepository extends Repository{
      *
      * @param User $user
      * @param $password
-     * @return User
+     * @return bool
      * @throws \Adldap\Exceptions\AdldapException
      */
     private function setPassword(User $user, $password)
     {
         $user->setPassword($password);
-        $user->save();
 
-        return $user;
+        return $user->save();
     }
 }
