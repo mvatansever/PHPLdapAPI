@@ -174,10 +174,11 @@ class UserRepository extends Repository{
      *
      * @param $accountName        string
      * @param $user_informations  array
-     * @return bool
+     * @return bool | array
      */
     public function updateUser($accountName, $user_informations = [])
     {
+        $updatedFields = [];
         $user = $this->getProvider()->search()->users()->findBy(
             $this->getProvider()->getSchema()->accountName(),
             $accountName
@@ -185,45 +186,57 @@ class UserRepository extends Repository{
 
         if($user instanceof User){
             if(isset($user_informations['displayName'])){
+                $updatedFields["displayName"] = $user_informations['displayName'];
                 $user->setDisplayName($user_informations['displayName']);
             }
 
             if(isset($user_informations['jobTitle'])){
+                $updatedFields["jobTitle"] = $user_informations['jobTitle'];
                 $user->setTitle($user_informations['jobTitle']);
             }
 
             if(isset($user_informations['mail'])){
+                $updatedFields["mail"] = $user_informations['mail'];
                 $user->setEmail($user_informations['mail']);
             }
 
             if(isset($user_informations['department'])){
+                $updatedFields["department"] = $user_informations['department'];
                 $user->setDepartment($user_informations['department']);
             }
 
             if(isset($user_informations['company'])){
+                $updatedFields["company"] = $user_informations['company'];
                 $user->setCompany($user_informations['company']);
             }
 
             if(isset($user_informations['office'])){
+                $updatedFields["office"] = $user_informations['office'];
                 $user->setPhysicalDeliveryOfficeName($user_informations['office']);
             }
 
             if(isset($user_informations['phone'])){
+                $updatedFields["phone"] = $user_informations['phone'];
                 $user->setTelephoneNumber($user_informations['phone']);
             }
 
             if(isset($user_informations['mobile'])){
+                $updatedFields["mobile"] = $user_informations['mobile'];
                 $user->setAttribute('mobile', $user_informations['mobile']);
             }
 
-            // Managers will search in LDAP which found managers to be merge with exists managers and will added to "manager" attribute
+            // Managers will search in LDAP which found managers to be merge
+            // with exists managers and will added to "manager" attribute.
             // For this reason the attribute has got specifically processes
             if( isset($user_informations['manager']) )
             {
+                $updatedFields["manager"] = $user_informations['manager'];
                 $user = $this->setManager($user, $user_informations['manager']);
             }
 
-            return $user->save();
+            if($user->save()) {
+                return $updatedFields;
+            }
         }
 
         return false;
