@@ -7,7 +7,7 @@ For this reason I want to share this project and a small support to Open Source 
 
 #How to Install It?
 Clone this repository to your local:
-**git clone https://github.com/mesutv/PHPLdapAPI.git**
+**git clone https://github.com/mvatansever/PHPLdapAPI.git**
 
 Install dependencies with composer:
 **composer install**
