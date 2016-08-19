@@ -7,7 +7,6 @@
 
 namespace App\Controllers;
 
-use Adldap\Models\User;
 use App\Repository\UserRepository;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -43,10 +42,8 @@ class UserController extends Controller{
         $returnUsers['results'] = $user_repo->getAllUsers();
 
         if(empty($returnUsers)){
-
-            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(204);
+            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(404);
         }else{
-
             $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(200);
             $resp->getBody()->write(json_encode($returnUsers));
         }
@@ -82,8 +79,7 @@ class UserController extends Controller{
             $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(201);
             $resp->getBody()->write(json_encode($parameters));
         }else{
-
-            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(501);
+            $resp = $resp->withHeader('Content-type', 'applicaton/json')->withStatus(500);
         }
 
         return $resp;
@@ -104,11 +100,10 @@ class UserController extends Controller{
         $user = $user_repo->getUser($user_id);
 
         if (empty($user)) {
-            $resp = $resp->withStatus(204);
+            $resp = $resp->withStatus(404);
         }else{
-
             $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
-            $resp->write(json_encode($user));
+            $resp->getBody()->write(json_encode($user));
         }
 
         return $resp;
@@ -130,17 +125,12 @@ class UserController extends Controller{
         $user_repo = new UserRepository($this->getProvider(), $this->userCN);
         $update_user = $user_repo->updateUser($user_id, $user_informations);
 
-        if($update_user instanceof User){
-
-            $attributes = $update_user->getAttributes();
-            unset($attributes['objectclass']);
-            unset($attributes['objectcategory']);
-
+        if($update_user){
             $resp = $resp->withHeader('Content-type', 'application/json')->withStatus(200);
-            $resp->write(json_encode($attributes));
+            $resp->getBody()->write(json_encode($user_informations));
         }else{
 
-            $resp->withStatus(409);
+            $resp = $resp->withStatus(409);
         }
 
         return $resp;
