@@ -5,8 +5,6 @@
  * Date: 15/06/16 14:55
  */
 
-error_reporting(E_WARNING);
-
 require_once "../vendor/autoload.php";
 
 $auth = require_once "../config/auth.php";
