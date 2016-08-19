@@ -8,6 +8,7 @@
 namespace App\Repository;
 
 use Adldap\Models\User;
+use Adldap\Objects\AccountControl;
 
 class UserRepository extends Repository{
 
@@ -148,6 +149,12 @@ class UserRepository extends Repository{
             $user->setAttribute('mobile', $user_informations['mobile']);
         }
         // Validation END
+
+        // Normal account saved for set password
+        $user->setAttribute(
+            $this->getProvider()->getSchema()->userAccountControl(),
+            AccountControl::NORMAL_ACCOUNT
+        );
 
         // Set user DN
         $userBaseDN = $this->makeDN($this->baseDN, $user_informations['name']);
