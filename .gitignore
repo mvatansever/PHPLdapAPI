@@ -4,3 +4,5 @@ composer.lock
 /public/.DS_Store
 /config/*.php
 !/config/*.php.dist
+
+tests/_output/*
