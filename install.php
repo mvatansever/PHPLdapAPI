@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Mesut Vatansever | mesut.vatansever[at]freebirdairlines.com
+ * Mesut Vatansever | mesut.vts@gmail.com
  * Date: 19/08/16 17:24
  */
 
