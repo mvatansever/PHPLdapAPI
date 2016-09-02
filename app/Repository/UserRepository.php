@@ -243,6 +243,29 @@ class UserRepository extends Repository{
 
     }
 
+    public function changePassword($accountName, $oldPassword, $newPassword)
+    {
+        $qb = $this->getProvider()->search()->newQuery($this->baseDN);
+
+        $user = $qb->whereEquals(
+            $this->getProvider()->getSchema()->accountName(),
+            $accountName
+        )->get();
+
+        if($user->count()){
+            $user = $user[0];
+        }
+
+
+        if($oldPassword == ""){
+            // If doing password reset action old password not required.
+            return $user->changePassword("", $newPassword, true);
+        }else{
+            // If doing password change action old password is required.
+            return $user->changePassword($oldPassword, $newPassword);
+        }
+    }
+
     /**
      * Set user's special name attributes.
      * CN, Name and sAMAccountName attributes setting here.
