@@ -135,4 +135,57 @@ class UserController extends Controller{
 
         return $resp;
     }
+
+    public function changePassword(ServerRequestInterface $req, ResponseInterface $resp, $args)
+    {
+        $userAccountName = $args['user_id'];
+        $passwords = (array) $req->getParsedBody();
+        $user_repo = new UserRepository($this->getProvider(), $this->userCN);
+
+        if(!isset($passwords['old'], $passwords['new'])){
+            $resp = $resp->withStatus(400);
+            $resp->getBody()->write(json_encode([
+                'message' => 'Old and new password must be set for password change operation.'
+            ]));
+
+            return $resp;
+        }
+
+        try {
+            $user_repo->changePassword($userAccountName, $passwords['old'], $passwords['new']);
+        } catch (\Exception $ex) {
+            $resp = $resp->withStatus(400);
+            $resp->getBody()->write(json_encode(['message' => $ex->getMessage()]));
+        }
+    }
+
+    public function resetPassword(ServerRequestInterface $req, ResponseInterface $resp, $args)
+    {
+        $userAccountName = $args['user_id'];
+        $parameters = (array) $req->getParsedBody();
+        $user_repo = new UserRepository($this->getProvider(), $this->userCN);
+
+        if(!isset($parameters['new'])){
+            $resp = $resp->withStatus(400);
+            $resp->getBody()->write(json_encode([
+                'message' => 'New password must be set for password reset operation.'
+            ]));
+
+            return $resp;
+        }
+
+        try {
+            $user_repo->changePassword($userAccountName, "", $parameters['new']);
+        } catch (Exception $ex) {
+            $resp = $resp->withStatus(400);
+            $resp->getBody()->write(json_encode(['message' => $ex->getMessage()]));
+        }
+
+        $resp = $resp->withStatus(200);
+        $resp->getBody()->write(json_encode([
+            'message' => 'Password changed with successfully!'
+        ]));
+
+        return $resp;
+    }
 }
