@@ -14,6 +14,8 @@ $app->group('/user', function() use($app){
     $app->get('/{user_id}', 'App\Controllers\UserController:getUser');
     $app->post('', 'App\Controllers\UserController:createUser');
     $app->put('/{user_id}', 'App\Controllers\UserController:updateUser');
+    $app->put('/{user_id}/passChange', 'App\Controllers\UserController:changePassword');
+    $app->post('/{user_id}/resetPassword', 'App\Controllers\UserController:resetPassword');
 });
 
 
