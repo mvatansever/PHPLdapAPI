@@ -11,7 +11,6 @@ use Adldap\Connections\Ldap;
 use Adldap\Connections\Provider;
 use Interop\Container\ContainerInterface;
 use Adldap\Connections\Provider as adLDAPProvider;
-use App\Controllers\LdapController;
 
 class Controller{
 
@@ -56,7 +55,7 @@ class Controller{
     {
         return $this->container;
     }
-    
+
     /**
      * @return null | adLDAPProvider
      */
