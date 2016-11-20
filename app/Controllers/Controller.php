@@ -11,9 +11,11 @@ use Adldap\Connections\Ldap;
 use Adldap\Connections\Provider;
 use Interop\Container\ContainerInterface;
 use Adldap\Connections\Provider as adLDAPProvider;
+use App\Controllers\LdapController;
 
 class Controller{
 
+    use LdapController;
     /**
      * Store Adldap Provider
      * @var Provider
@@ -32,48 +34,20 @@ class Controller{
      */
     protected $ldapConnection;
 
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
     protected $connected = false;
     protected $own_base_dn;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->ldapConfig = $this->getConfiguration();
-        $this->ldapConnection = $this->getLdapConnection();
-        $this->provider = new Provider($this->ldapConfig, $this->ldapConnection);
-        $this->provider->connect();
+        $this->init();
     }
 
-    /**
-     * Return new Ldap class with new ldap connection.
-     *
-     * @param bool $tls
-     * @return Ldap
-     */
-    public function getLdapConnection($tls = true)
-    {
-        $ldap = new Ldap();
-        $ldap->connect($this->ldapConfig['domain_controllers'][0]);
-
-        if ($tls) {
-            $ldap->startTLS();
-            $ldap->useTLS();
-        }
-
-        return $ldap;
-    }
-
-    /**
-     * Return connection.ldap configurations.
-     *
-     * @return array
-     */
-    public function getConfiguration()
-    {
-        $ldapConfiguration = $this->getContainer()->get('connection')['ldap'];
-
-        return $ldapConfiguration;
-    }
 
     /**
      * @return ContainerInterface
@@ -82,7 +56,7 @@ class Controller{
     {
         return $this->container;
     }
-
+    
     /**
      * @return null | adLDAPProvider
      */
