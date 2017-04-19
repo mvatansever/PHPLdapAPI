@@ -1,7 +1,7 @@
 # PHPLdapAPI
 Open source PHP (with Slim micro framework) Ldap API.
 
-#Description
+# Description
 This project based on Slim Framework 3 and use Adldap2 package for LDAP jobs. I need an API in PHP working with LDAP. But I can't found any open source project at Github or another sites.
 For this reason I want to share this project and a small support to Open Source world. 
 
