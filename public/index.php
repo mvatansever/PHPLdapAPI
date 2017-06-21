@@ -16,9 +16,6 @@ $app = new \Slim\App([
     'connection' => require_once "../config/connection.php"
 ]);
 
-// Helpers
-require_once "../app/Helper/repository.php";
-
 if ($app->getContainer()->get('settings')['basic_auth']) {
     // Basic Authentication for all routes
     $basic_auth = new \App\Middleware\BasicAuth($auth['basic_auths']);
